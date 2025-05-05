@@ -6,26 +6,31 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
-import "./tailwind.css";
+import "./index.css";
 import App from "./App.tsx";
-import ErrorPage from "./ui/ErrorPage.tsx";
+import ErrorPage from "./pages/ErrorPage.tsx";
+import TaskPage from "./pages/TaskPage.tsx";
+import { Provider } from "react-redux";
+import { store } from "./redux/store.ts";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route
-      path="/"
-      element={<App />}
-      errorElement={<ErrorPage />}
-      loader={async () => {
-        // Fetch any data
-        return { message: "Data loaded successfully" };
-      }}
-    />,
+    <Route element={<App />} errorElement={<ErrorPage />}>
+      <Route
+        path="/"
+        loader={async () => {
+          return { message: "Data loaded successfully" };
+        }}
+        element={<TaskPage />}
+      />
+    </Route>,
   ),
 );
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </StrictMode>,
 );

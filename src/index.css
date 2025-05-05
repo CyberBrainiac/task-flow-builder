@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+ 
+#app {
+  width: 100vw;
+  height: 100vh;
+}
+ 
+.react-flow__node-selectorNode {
+  font-size: 12px;
+  background: #eee;
+  border: 1px solid #555;
+  border-radius: 5px;
+  text-align: center;
+}
+
+:root {
+  --header-height: 80px;
+}
