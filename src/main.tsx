@@ -16,13 +16,7 @@ import { store } from "./redux/store.ts";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />} errorElement={<ErrorPage />}>
-      <Route
-        path="/"
-        loader={async () => {
-          return { message: "Data loaded successfully" };
-        }}
-        element={<TaskPage />}
-      />
+      <Route path="/" element={<TaskPage />} />
     </Route>,
   ),
 );

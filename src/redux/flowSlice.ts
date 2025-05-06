@@ -37,13 +37,13 @@ export const flowSlice = createSlice({
     addNode: (state, action: PayloadAction<Node>) => {
       state.nodes = [...state.nodes, action.payload];
     },
-    onNodesChange: (state, action: PayloadAction<NodeChange[]>) => {
+    changeNodes: (state, action: PayloadAction<NodeChange[]>) => {
       state.nodes = applyNodeChanges(action.payload, state.nodes);
     },
     setEdges: (state, action: PayloadAction<Edge[]>) => {
       state.edges = action.payload;
     },
-    onEdgesChange: (state, action: PayloadAction<EdgeChange[]>) => {
+    changeEdges: (state, action: PayloadAction<EdgeChange[]>) => {
       state.edges = applyEdgeChanges(action.payload, state.edges);
     },
     addEdge: (state, action: PayloadAction<Edge>) => {
@@ -77,9 +77,9 @@ export const selectLastNodeId = createSelector([selectNodes], (nodes) => {
 export const {
   setNodes,
   addNode,
-  onNodesChange,
+  changeNodes,
   setEdges,
-  onEdgesChange,
+  changeEdges,
   addEdge,
   onConnect,
 } = flowSlice.actions;

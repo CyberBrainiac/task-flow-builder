@@ -1,33 +1,59 @@
-import React, { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import clsx from "clsx";
+
 import {
   ReactFlow,
-  MiniMap,
   Controls,
   Background,
   NodeChange,
   EdgeChange,
   Connection,
   BackgroundVariant,
+  Panel,
+  Node,
+  useNodesState,
+  OnNodeDrag,
+  NodeMouseHandler,
 } from "@xyflow/react";
 import { useAppSelector, useAppDispatch } from "../redux/store";
-import { onNodesChange, onEdgesChange, onConnect } from "../redux/flowSlice";
+import { changeNodes, changeEdges, onConnect } from "../redux/flowSlice";
 
 import "@xyflow/react/dist/style.css";
 
 export default function TaskPage() {
   const dispatch = useAppDispatch();
-  const { nodes, edges } = useAppSelector((state) => state.flow);
+  const { nodes: storedNodes, edges } = useAppSelector((state) => state.flow);
+  const [currentNode, setCurrentNode] = useState<Node | null>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(storedNodes);
 
-  const handleNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      dispatch(onNodesChange(changes));
+  const handleNodeDragStop: OnNodeDrag<Node> = useCallback(
+    (event, node, nodes) => {
+      const nodeChanges: NodeChange[] = [
+        {
+          id: node.id,
+          type: "position",
+          position: node.position,
+        },
+      ];
+
+      dispatch(changeNodes(nodeChanges));
     },
     [dispatch],
   );
 
+  const handleNodeClick: NodeMouseHandler = useCallback((event, node) => {
+    setCurrentNode(node);
+  }, []);
+
+  const handleClickPane = (event: React.MouseEvent) => {
+    if (event.type !== "click") return;
+
+    setCurrentNode(null);
+  };
+
   const handleEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      dispatch(onEdgesChange(changes));
+      dispatch(changeEdges(changes));
     },
     [dispatch],
   );
@@ -46,37 +72,69 @@ export default function TaskPage() {
     [dispatch],
   );
 
+  const handleLabelInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!currentNode) return;
+
+    const label = e.target.value;
+
+    const updatedNode = {
+      ...currentNode,
+      data: {
+        ...currentNode.data,
+        label,
+      },
+    };
+
+    const nodeChanges: NodeChange[] = [
+      {
+        id: currentNode.id,
+        type: "replace",
+        item: updatedNode,
+      },
+    ];
+
+    setCurrentNode(updatedNode);
+
+    if (label.length === 0) return;
+    dispatch(changeNodes(nodeChanges));
+  };
+
+  useEffect(() => {
+    setNodes(storedNodes);
+  }, [storedNodes, setNodes]);
+
   return (
     <main className="h-[calc(100vh-var(--header-height))] w-screen">
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={handleNodesChange}
+        onNodesChange={onNodesChange}
         onEdgesChange={handleEdgesChange}
+        onNodeDragStop={handleNodeDragStop}
+        onNodeClick={handleNodeClick}
         onConnect={handleConnect}
+        onPaneClick={handleClickPane}
+        fitView
       >
-        <Panel position="top-left" style={{ width: 200 }}>
-          <label className="xy-theme__label">Label: </label>
-          <input
-            value={nodeName}
-            onChange={(evt) => setNodeName(evt.target.value)}
-            className="xy-theme__input"
-          />
-
-          <label className="xy-theme__label">Background: </label>
-          <input
-            value={nodeBg}
-            onChange={(evt) => setNodeBg(evt.target.value)}
-            className="xy-theme__input"
-          />
-
-          <label className="xy-theme__label">Hidden:</label>
-          <input
-            type="checkbox"
-            checked={nodeHidden}
-            onChange={(evt) => setNodeHidden(evt.target.checked)}
-            className="xy-theme__checkbox"
-          />
+        <Panel
+          position="top-left"
+          className={clsx(
+            "pointer-events-auto h-full w-48 bg-stone-200",
+            "transition-all duration-300 ease-in-out",
+            "absolute !m-0",
+            {
+              "!left-0": !!currentNode,
+              "!-left-48": !currentNode,
+            },
+          )}
+        >
+          <label>Task: </label>
+          {currentNode ? (
+            <input
+              value={currentNode?.data.label as string}
+              onChange={handleLabelInput}
+            />
+          ) : null}
         </Panel>
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
