@@ -1,5 +1,13 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Node, Edge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  Node,
+  Edge,
+  applyNodeChanges,
+  applyEdgeChanges,
+  NodeChange,
+  EdgeChange,
+} from "@xyflow/react";
+import { RootState } from "./store";
 
 interface FlowState {
   nodes: Node[];
@@ -20,11 +28,14 @@ const initialState: FlowState = {
 };
 
 export const flowSlice = createSlice({
-  name: 'flow',
+  name: "flow",
   initialState,
   reducers: {
     setNodes: (state, action: PayloadAction<Node[]>) => {
       state.nodes = action.payload;
+    },
+    addNode: (state, action: PayloadAction<Node>) => {
+      state.nodes = [...state.nodes, action.payload];
     },
     onNodesChange: (state, action: PayloadAction<NodeChange[]>) => {
       state.nodes = applyNodeChanges(action.payload, state.nodes);
@@ -38,7 +49,10 @@ export const flowSlice = createSlice({
     addEdge: (state, action: PayloadAction<Edge>) => {
       state.edges = [...state.edges, action.payload];
     },
-    onConnect: (state, action: PayloadAction<{ source: string; target: string }>) => {
+    onConnect: (
+      state,
+      action: PayloadAction<{ source: string; target: string }>,
+    ) => {
       const newEdge: Edge = {
         id: `e${action.payload.source}-${action.payload.target}`,
         source: action.payload.source,
@@ -49,13 +63,25 @@ export const flowSlice = createSlice({
   },
 });
 
-export const { 
-  setNodes, 
-  onNodesChange, 
-  setEdges, 
-  onEdgesChange, 
-  addEdge, 
-  onConnect 
+const selectNodes = (state: RootState) => state.flow.nodes;
+
+export const selectLastNodeId = createSelector([selectNodes], (nodes) => {
+  return nodes.reduce((acc, node) => {
+    if (!node.id || +node.id < +acc) {
+      return acc;
+    }
+    return node.id;
+  }, "-1");
+});
+
+export const {
+  setNodes,
+  addNode,
+  onNodesChange,
+  setEdges,
+  onEdgesChange,
+  addEdge,
+  onConnect,
 } = flowSlice.actions;
 
 export default flowSlice.reducer;
