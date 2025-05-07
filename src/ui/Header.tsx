@@ -13,7 +13,8 @@ export default function Header() {
     const newNode = {
       id: newId,
       position: { x: xPosition, y: 0 },
-      data: { label: "New Task" },
+      data: { text: "" },
+      type: "text",
     };
     dispatch(addNode(newNode));
     setXPosition((prevPosition) => prevPosition + 83);
@@ -23,7 +24,7 @@ export default function Header() {
     <header className="flex h-[var(--header-height)] items-center justify-between bg-gray-100 px-6 shadow">
       <button
         onClick={handleCreateTask}
-        className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+        className="rounded bg-blue-400 px-4 py-2 text-white hover:bg-blue-500"
       >
         Create task
       </button>
