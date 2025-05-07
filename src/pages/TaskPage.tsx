@@ -41,7 +41,7 @@ export default function TaskPage() {
   const currentNode = storedNodes.find((node) => node.id === currentNodeId);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(storedEdges);
+  const [edges, setEdges, _onEdgesChange] = useEdgesState(storedEdges);
 
   const nodeTypes = {
     text: TextNode,
@@ -50,7 +50,7 @@ export default function TaskPage() {
   console.log("render main page");
 
   const handleNodeDragStop: OnNodeDrag<Node> = useCallback(
-    (event, node, nodes) => {
+    (_event, node, _nodes) => {
       const nodeChanges: NodeChange[] = [
         {
           id: node.id,
@@ -89,7 +89,7 @@ export default function TaskPage() {
   };
 
   const handleNodeClick: NodeMouseHandler = useCallback(
-    (event, node) => {
+    (_event, node) => {
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev);
         newParams.set("nodeId", node.id);
