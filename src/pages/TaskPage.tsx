@@ -47,8 +47,6 @@ export default function TaskPage() {
     text: TextNode,
   };
 
-  console.log("render main page");
-
   const handleNodeDragStop: OnNodeDrag<Node> = useCallback(
     (_event, node, _nodes) => {
       const nodeChanges: NodeChange[] = [
