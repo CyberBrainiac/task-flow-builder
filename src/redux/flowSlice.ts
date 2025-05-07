@@ -8,46 +8,34 @@ import {
   EdgeChange,
 } from "@xyflow/react";
 import { RootState } from "./store";
+import { loadDataFromStorage } from "./flowMiddleware";
 
 interface FlowState {
   nodes: Node[];
   edges: Edge[];
 }
 
-const initialNodes: Node[] = [
-  { id: "1", type: "text", position: { x: 0, y: 0 }, data: { text: "1" } },
-  { id: "2", type: "text", position: { x: 0, y: 100 }, data: { text: "2" } },
-  { id: "3", type: "text", position: { x: 0, y: 200 }, data: { text: "3" } },
-];
-
-const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
+const defaultNodes: Node[] = [];
+const defaultEdges: Edge[] = [];
+const storedData = loadDataFromStorage();
 
 const initialState: FlowState = {
-  nodes: initialNodes,
-  edges: initialEdges,
+  nodes: storedData.nodes || defaultNodes,
+  edges: storedData.edges || defaultEdges,
 };
 
 export const flowSlice = createSlice({
   name: "flow",
   initialState,
   reducers: {
-    setNodes: (state, action: PayloadAction<Node[]>) => {
-      state.nodes = action.payload;
-    },
     addNode: (state, action: PayloadAction<Node>) => {
       state.nodes = [...state.nodes, action.payload];
     },
     changeNodes: (state, action: PayloadAction<NodeChange[]>) => {
       state.nodes = applyNodeChanges(action.payload, state.nodes);
     },
-    setEdges: (state, action: PayloadAction<Edge[]>) => {
-      state.edges = action.payload;
-    },
     changeEdges: (state, action: PayloadAction<EdgeChange[]>) => {
       state.edges = applyEdgeChanges(action.payload, state.edges);
-    },
-    addEdge: (state, action: PayloadAction<Edge>) => {
-      state.edges = [...state.edges, action.payload];
     },
     onConnect: (
       state,
@@ -60,10 +48,22 @@ export const flowSlice = createSlice({
       };
       state.edges = [...state.edges, newEdge];
     },
+    deleteNode: (state, action: PayloadAction<string>) => {
+      const nodeId = action.payload;
+      state.nodes = state.nodes.filter((node) => node.id !== nodeId);
+      state.edges = state.edges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId,
+      );
+    },
   },
 });
 
 const selectNodes = (state: RootState) => state.flow.nodes;
+
+export const selectNodeById = (id: string) =>
+  createSelector([selectNodes], (nodes) =>
+    nodes.find((node) => node.id === id),
+  );
 
 export const selectLastNodeId = createSelector([selectNodes], (nodes) => {
   return nodes.reduce((acc, node) => {
@@ -74,14 +74,7 @@ export const selectLastNodeId = createSelector([selectNodes], (nodes) => {
   }, "-1");
 });
 
-export const {
-  setNodes,
-  addNode,
-  changeNodes,
-  setEdges,
-  changeEdges,
-  addEdge,
-  onConnect,
-} = flowSlice.actions;
+export const { addNode, changeNodes, changeEdges, onConnect, deleteNode } =
+  flowSlice.actions;
 
 export default flowSlice.reducer;

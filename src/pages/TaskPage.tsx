@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 
 import {
   ReactFlow,
@@ -16,27 +16,38 @@ import {
   MarkerType,
   useEdgesState,
   Edge,
+  ConnectionLineType,
 } from "@xyflow/react";
 import { useAppSelector, useAppDispatch } from "../redux/store";
-import { changeNodes, changeEdges } from "../redux/flowSlice";
+import {
+  changeNodes,
+  changeEdges,
+  onConnect,
+  deleteNode,
+} from "../redux/flowSlice";
 
 import "@xyflow/react/dist/style.css";
 import TextNode from "../ui/nodes/TextNode";
 import clsx from "clsx";
+import { useSearchParams } from "react-router-dom";
 
 export default function TaskPage() {
   const dispatch = useAppDispatch();
   const { nodes: storedNodes, edges: storedEdges } = useAppSelector(
     (state) => state.flow,
   );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentNodeId = searchParams.get("nodeId");
+  const currentNode = storedNodes.find((node) => node.id === currentNodeId);
 
-  const [currentNode, setCurrentNode] = useState<Node | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(storedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storedEdges);
 
   const nodeTypes = {
     text: TextNode,
   };
+
+  console.log("render main page");
 
   const handleNodeDragStop: OnNodeDrag<Node> = useCallback(
     (event, node, nodes) => {
@@ -56,6 +67,7 @@ export default function TaskPage() {
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentNode) return;
     const text = e.target.value;
+    if (text.length > 20) return;
 
     const updatedNode = {
       ...currentNode,
@@ -73,17 +85,26 @@ export default function TaskPage() {
       },
     ];
 
-    setCurrentNode(updatedNode);
     dispatch(changeNodes(nodeChanges));
   };
 
-  const handleNodeClick: NodeMouseHandler = useCallback((event, node) => {
-    setCurrentNode(node);
-  }, []);
+  const handleNodeClick: NodeMouseHandler = useCallback(
+    (event, node) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        newParams.set("nodeId", node.id);
+        return newParams;
+      });
+    },
+    [setSearchParams],
+  );
 
   const handleClickPane = (event: React.MouseEvent) => {
     if (event.type !== "click") return;
-    setCurrentNode(null);
+
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("nodeId");
+    setSearchParams(newParams);
   };
 
   const handleEdgesChange = useCallback(
@@ -93,36 +114,41 @@ export default function TaskPage() {
     [dispatch],
   );
 
+  const handleDeleteNode = useCallback(() => {
+    if (!currentNodeId) return;
+    dispatch(deleteNode(currentNodeId));
+
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("nodeId");
+    setSearchParams(newParams);
+  }, [currentNodeId, dispatch, searchParams, setSearchParams]);
+
   const handleConnect = useCallback(
     (params: Connection) => {
-      // Add custom edge properties here
       setEdges((eds) =>
         eds.concat({
           ...params,
           id: `e-${params.source}-${params.target}`,
-          type: "straight", // Using straight line type
-          style: { stroke: "#6366f1", strokeWidth: 2 },
+          type: "straight",
+          style: { stroke: "#90aac1", strokeWidth: 2 },
           animated: false,
           markerEnd: {
             type: "arrowclosed",
-            color: "#6366f1",
-            width: 20,
-            height: 20,
+            color: "#90aac1",
+            width: 10,
+            height: 10,
           },
         } as Edge),
       );
+      dispatch(
+        onConnect({
+          source: params.source,
+          target: params.target,
+        }),
+      );
     },
-    // (connection: Connection) => {
-    //   if (connection.source && connection.target) {
-    //     dispatch(
-    //       onConnect({
-    //         source: connection.source,
-    //         target: connection.target,
-    //       }),
-    //     );
-    //   }
-    // },
-    [dispatch],
+
+    [dispatch, setEdges],
   );
 
   useEffect(() => {
@@ -148,12 +174,13 @@ export default function TaskPage() {
           maxZoom: 4,
         }}
         className="bg-gray-50"
+        connectionLineType={ConnectionLineType.Straight}
         defaultEdgeOptions={{
           animated: false,
-          style: { stroke: "#6366f1", strokeWidth: 2 },
+          style: { stroke: "#90aac1", strokeWidth: 2 },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: "#6366f1",
+            color: "#90aac1",
             width: 10,
             height: 10,
           },
@@ -178,11 +205,19 @@ export default function TaskPage() {
           <div className="space-y-2">
             <label className="text-sm text-gray-600">Description</label>
             <input
-              value={currentNode?.data.text as string}
+              value={(currentNode?.data.text as string) || ""}
               onChange={handleInput}
               className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
               placeholder="Enter task name..."
             />
+          </div>
+          <div className="mt-4">
+            <button
+              onClick={handleDeleteNode}
+              className="w-full rounded bg-red-400 px-3 py-2 text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2"
+            >
+              Delete Task
+            </button>
           </div>
         </Panel>
         <Controls className="!rounded !border !border-gray-200 !bg-white !shadow-md" />
