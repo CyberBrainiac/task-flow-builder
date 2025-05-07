@@ -1,54 +1,84 @@
-# React + TypeScript + Vite
+Test task: “Task Flow Builder”
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project uses **React**, **TypeScript**, and **Vite** for fast and modern frontend development.
 
-Currently, two official plugins are available:
+## 🔧 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Redux](https://redux.js.org/) (with @reduxjs/toolkit)
+- [React Flow](https://reactflow.dev/)
+- [Vite](https://vitejs.dev/)
 
-## Expanding the ESLint configuration
+## 📦 Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+pnpm dev
+```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## 🏗 Build
+
+```bash
+pnpm build
+```
+
+## 🔍 Preview Production Build
+
+```bash
+pnpm preview
+```
+
+Task description:
+```
+Вимоги:
+
+Візуалізація задач:
+Кожна задача — це блок (node) з назвою
+Можна перетягувати блоки (drag&drop) вмежах області.
+
+Додавання задач:
+Кнопка "Add Task" створює нову ноду на полотні (React Flow)
+Назву задачіможна редагувати в input полі прямо в ноді або в боковій панелі.
+
+З'єднання задач:
+Користувачможе зʼєднати задачіміж собою стрілками (edges).
+
+Редагування задачі:
+При кліку на блок відкривається бокова панель з інпутомдля редагування назви.
+
+Збереження стану:
+Використати Redux Toolkit для збереження списку задач та зв’язківміж ними.
+(Опційно)
+Збереження у localStorage, щоб після перезавантаження все зберігалось.
+
+Технічні вимоги:
+Структурувати компоненти логічно (наприклад: components/, store/,types/).
+Використовувати useAppSelector, useAppDispatch для роботи з Redux.
+Забезпечити типізацію за допомогою TypeScript.
+Оформити проект мінімально, але охайно.
+
+Стек технологій:
+React
+Redux Toolkit
+React Flow
+ТypeScript
+(Опційно: styled-components / Tailwind / SCSS)
+
+Що оцінюється:
+Розуміння React/Redux архітектури.
+Вміння працювати з бібліотекою React Flow.
+Читабельність і структура коду.
+TypeScript-типізація.
+Робоча логіка з додаванням, редагуванням та з'єднанням нод.
+
+Що здати:
+Посилання на GitHub репозиторій.
+Короткий опис, як запустити (README.md)
+(Опційно) Демо через Vercel/Netlify.
 ```
